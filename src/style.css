@@ -1,0 +1,38 @@
+h1,
+p {
+  font-family: Lato;
+}
+
+.search-panel {
+  border: 1px solid #e3e4e8;
+  border-radius: 4px;
+  background: #ffffff;
+  width: 100%;
+}
+
+.search-row {
+  display: flex;
+  width: 100%;
+}
+
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.controls-row .ant-btn {
+  margin-left: 8px;
+}
+
+.search-list .ant-list-item {
+  padding: 4px 0px;
+}
+
+.hidden-col {
+  display: none;
+}
+
+.input {
+  width: 100px;
+  margin: 4px;
+}
