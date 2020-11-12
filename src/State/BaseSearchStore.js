@@ -2,17 +2,20 @@ import { observable, action, makeAutoObservable, when, autorun } from "mobx";
 
 export class BaseSearchStore {
   conditions = undefined;
-
-  onAdd;
+  
+  
 }
 
 export class Condition {
+  rootStore = undefined;
+
   leftOperand = undefined;
   rightOperand = undefined;
   operator = undefined;
   idx = undefined;
 
-  constructor(leftOperand, operator, rightOperand, idx) {
+  constructor(leftOperand, operator, rightOperand, rootStore) {
+    this.rootStore = rootStore;
     this.leftOperand = leftOperand;
     this.rightOperand = rightOperand;
     this.operator = operator;
@@ -20,32 +23,25 @@ export class Condition {
     makeAutoObservable(this);
   }
 
-  onChange = (operand, value) => (this[operand] = value);
+  onChangeRight = value => (this.rightOperand = value);
+
+  onRemove = () => {
+    this.rootStore.onRemove(this);
+    this.rootStore = void 0;
+  };
 }
 
 export class CompoundCondition {
   conditions = [];
   operator = undefined;
-  disposer;
+  rootStore;
 
-  constructor(operator, conditions) {
+  constructor(operator, conditions, rootStore) {
     this.operator = operator;
-
+    this.rootStore = rootStore;
     if (conditions && conditions.length >= 0) this.conditions = conditions;
 
     makeAutoObservable(this);
-
-    this.disposer = autorun(() => {
-      if (
-        this.conditions.length > 0 &&
-        this.conditions[0].hasOwnProperty("conditions") &&
-        this.conditions[0].conditions.length == 1
-      ) {
-        console.log("when");
-        this.conditions[0].disposer();
-        this.conditions[0] = this.conditions[0].conditions[0];
-      }
-    });
   }
 
   onAdd = operator => {
@@ -58,14 +54,18 @@ export class CompoundCondition {
       this.conditions = [condition];
     }
 
-    this.conditions.push(
-      new Condition(void 0, void 0, void 0, this, this.conditions.length)
-    );
+    this.conditions.push(new Condition(void 0, void 0, void 0, this));
 
     this.operator = operator;
   };
 
-  onRemove = idx => {
+  onRemove = item => {
+    let idx = this.conditions.indexOf(item);
     this.conditions.splice(idx, 1);
+
+    if (this.rootStore && this.conditions.length == 1) {
+      this.rootStore.conditions[0] = this.conditions[0];
+      this.rootStore = void 0;
+    }
   };
 }

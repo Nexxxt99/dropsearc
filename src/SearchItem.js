@@ -60,17 +60,25 @@ export const SearchConditions = observer(
 
 export const SearchItem = observer(
   class SearchItem extends React.Component {
+    onChange = v => {
+      this.props.store.onChangeRight(v.target.value);
+    };
+
     render() {
       let {
-        store: { leftOperand, rightOperand, operator, onChange },
+        store: { leftOperand, rightOperand, operator, onChangeRight },
         onRemove
       } = this.props;
 
       return (
         <li>
-          <Input className={"input"} value={leftOperand} />
-          <Input className={"input"} value={operator} />
-          <Input className={"input"} value={rightOperand} />
+          <Input className={"inputLoc"} value={leftOperand} />
+          <Input className={"inputLoc"} value={operator} />
+          <Input
+            className={"inputLoc"}
+            value={rightOperand}
+            onChange={this.onChange}
+          />
           <Button icon="delete" onClick={onRemove} />
         </li>
       );

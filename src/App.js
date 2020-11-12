@@ -25,15 +25,16 @@ searchStoreInternal.rootStore = searchStore;
 
 const ObserverApp = observer(
   class App extends React.Component {
+    searchStore = new CompoundCondition("AND");
+
     constructor(props) {
       super(props);
-
+      this.state = { visible: true };
       console.log(props);
     }
 
     handleClose() {
-      this.setState({ modal: false });
-      console.log(this.state.getStateText());
+      this.setState({ visible: false });
     }
 
     render() {
@@ -53,23 +54,24 @@ const ObserverApp = observer(
                   <Icon type="close" onClick={() => console.log("close")} />
                   <Icon
                     type="search"
-                    onClick={() =>
-                      this.setState({ open: false, modal: true }, () =>
+                    onClick={() => {
+                      this.searchStore = new CompoundCondition("AND");
+                      this.setState({ open: false, visible: true }, () =>
                         this.setState({ open: true })
-                      )
-                    }
+                      );
+                    }}
                   />
                 </span>
               }
             />
           </AutoComplete>
           <Modal
-            visible={true}
-            /*onOk={this.handleClose.bind(this)}
-            onCancel={this.handleClose.bind(this)}*/
+            visible={this.state.visible}
+            onOk={this.handleClose.bind(this)}
+            onCancel={this.handleClose.bind(this)}
             width={"90vw"}
           >
-            <SearchConditions store={searchStore} />
+            <SearchConditions store={this.searchStore} />
           </Modal>
         </div>
       );
