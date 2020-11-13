@@ -1,6 +1,6 @@
 import React from "react";
-import "./style.css";
 import "antd/dist/antd.css";
+import "./style.css";
 import { AutoComplete, Input, Icon, Dropdown, Menu, Modal, Table } from "antd";
 import { observer, Observer } from "mobx-react";
 
@@ -11,7 +11,11 @@ import { SearchConditions } from "./SearchItem";
 import { ControlPanel } from "./ControlPanel";
 import { ResultTable } from "./ResultTable";
 import { BaseContext } from "./contexts/BaseContext";
-import { CompoundCondition, Condition } from "./State/BaseSearchStore";
+import {
+  CompoundCondition,
+  Condition,
+  ControlStore
+} from "./State/BaseSearchStore";
 
 let searchStoreInternal = new CompoundCondition("AND", [
   new Condition("name", "equals", "Alex"),
@@ -19,13 +23,9 @@ let searchStoreInternal = new CompoundCondition("AND", [
   new Condition("gender", "equals", "male")
 ]);
 
-let searchStore = new CompoundCondition("AND");
-
-searchStoreInternal.rootStore = searchStore;
-
 const ObserverApp = observer(
   class App extends React.Component {
-    searchStore = new CompoundCondition("AND");
+    searchStore = new ControlStore();
 
     constructor(props) {
       super(props);
@@ -38,7 +38,6 @@ const ObserverApp = observer(
     }
 
     render() {
-      console.log("context", this.context);
       const dataSource = ["Part 1", "Part 2", "Part 3", "Part 4", "Part 5"];
       return (
         <div>
@@ -71,7 +70,11 @@ const ObserverApp = observer(
             onCancel={this.handleClose.bind(this)}
             width={"90vw"}
           >
-            <SearchConditions store={this.searchStore} />
+            <ControlPanel store={this.searchStore}>
+              {this.searchStore.conditions && (
+                <SearchConditions store={this.searchStore.conditions} />
+              )}
+            </ControlPanel>
           </Modal>
         </div>
       );

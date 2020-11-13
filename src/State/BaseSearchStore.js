@@ -1,9 +1,46 @@
-import { observable, action, makeAutoObservable, when, autorun } from "mobx";
+import {
+  observable,
+  action,
+  makeAutoObservable,
+  makeObservable,
+  computed,
+  when,
+  autorun,
+  toJS
+} from "mobx";
 
-export class BaseSearchStore {
+export class ControlStore {
   conditions = undefined;
-  
-  
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  onAddAnd = () => {
+    console.log("here");
+    if (this.conditions) {
+      this.conditions.onAdd("AND");
+    } else {
+      this.conditions = new CompoundCondition("AND", [new Condition()]);
+    }
+    console.log(this.conditions);
+  };
+
+  onAddOr = () => {
+    console.log("here");
+    if (this.conditions) {
+      this.conditions.onAdd("OR");
+    } else {
+      this.conditions = new CompoundCondition("OR", [new Condition()]);
+    }
+    console.log(this.conditions);
+  };
+
+  onRemove = () => {
+    this.conditions = undefined;
+  };
+
+  getFiltersText = () => console.log(toJS(this.conditions));
 }
 
 export class Condition {
@@ -34,14 +71,25 @@ export class Condition {
 export class CompoundCondition {
   conditions = [];
   operator = undefined;
-  rootStore;
+  
 
   constructor(operator, conditions, rootStore) {
     this.operator = operator;
-    this.rootStore = rootStore;
-    if (conditions && conditions.length >= 0) this.conditions = conditions;
+    
+    if (conditions && conditions.length >= 0) {
+      this.conditions = conditions;
+      conditions.forEach(e => (e.rootStore = this));
+    }
 
-    makeAutoObservable(this);
+    when(()=>{this.conditions && this.conditions[0] && this.conditions[0].length == 1},()=>console.log('zero'))
+
+    makeObservable(this, {
+      conditions: observable,
+      operator: observable,
+      onAdd: action,
+      onRemove: action,
+      toJSON: computed
+    });
   }
 
   onAdd = operator => {
@@ -68,4 +116,11 @@ export class CompoundCondition {
       this.rootStore = void 0;
     }
   };
+
+  get toJSON() {
+    return {
+      conditions: this.conditions,
+      operator: this.operator
+    };
+  }
 }

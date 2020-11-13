@@ -22,37 +22,25 @@ const operations = ["AND", "OR", "EXCEPT", "ANY"];
 export const SearchConditions = observer(
   class SearchConditions extends React.Component {
     render() {
+      console.log("prps", this.props);
       const { operator, conditions, onAdd } = this.props.store;
       return (
-        <>
-          <Row>
-            <Col>
-              <Button type={"danger"}>{operator}</Button>
-              <Button type={"primary"} onClick={() => onAdd("AND")}>
-                Add AND
-              </Button>
-              <Button type={"primary"} onClick={() => onAdd("OR")}>
-                Add OR
-              </Button>
-            </Col>
-          </Row>
-          <Row>
-            <ul>
-              {conditions.map((e, i) => {
-                if (e.hasOwnProperty("conditions"))
-                  return <SearchConditions key={i} store={e} />;
-                else
-                  return (
-                    <SearchItem
-                      key={i}
-                      store={e}
-                      onRemove={this.props.store.onRemove.bind({}, i)}
-                    />
-                  );
-              })}
-            </ul>
-          </Row>
-        </>
+        <div className="search-panel-compound">
+          <ul>
+            {[...conditions].reverse().map((e, i) => {
+              if (e.hasOwnProperty("conditions"))
+                return <SearchConditions key={i} store={e} />;
+              else
+                return (
+                  <SearchItem
+                    key={i}
+                    store={e}
+                    onRemove={this.props.store.onRemove.bind({}, i)}
+                  />
+                );
+            })}
+          </ul>
+        </div>
       );
     }
   }
@@ -65,13 +53,21 @@ export const SearchItem = observer(
     };
 
     render() {
+      const menu = (
+        <Menu>
+          <Menu.Item key="1">+ Add field</Menu.Item>
+        </Menu>
+      );
+
       let {
         store: { leftOperand, rightOperand, operator, onChangeRight },
         onRemove
       } = this.props;
 
       return (
-        <li>
+        <li className={"search-panel"}>
+          <Icon type={"more"} />
+          <Icon type={"more"} />
           <Input className={"inputLoc"} value={leftOperand} />
           <Input className={"inputLoc"} value={operator} />
           <Input
@@ -79,7 +75,10 @@ export const SearchItem = observer(
             value={rightOperand}
             onChange={this.onChange}
           />
-          <Button icon="delete" onClick={onRemove} />
+          <Dropdown overlay={menu}>
+            <Button className={"btn"} icon={"ellipsis"} />
+          </Dropdown>
+          <Button className={"btn"} icon="delete" onClick={onRemove} />
         </li>
       );
     }

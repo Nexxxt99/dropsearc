@@ -36,3 +36,26 @@ p {
   width: 100px;
   margin: 4px;
 }
+
+ul {
+  list-style-type: none;
+}
+
+.btn {
+  margin: 4px;
+}
+
+.search-panel {
+  border: 1px solid #e3e4e8;
+  border-radius: 4px;
+  background: #ffffff;
+  width: 100%;
+}
+
+.search-panel-compound {
+  border: 1px solid #e3e4e8;
+  border-radius: 4px;
+  background: #ffffff;
+  width: 100%;
+  padding: 10px;
+}
