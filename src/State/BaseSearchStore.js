@@ -9,6 +9,8 @@ import {
   toJS
 } from "mobx";
 
+const makeJSON = obj => {};
+
 export class ControlStore {
   conditions = undefined;
 
@@ -44,51 +46,44 @@ export class ControlStore {
 }
 
 export class Condition {
-  rootStore = undefined;
-
   leftOperand = undefined;
   rightOperand = undefined;
   operator = undefined;
-  idx = undefined;
 
   constructor(leftOperand, operator, rightOperand, rootStore) {
-    this.rootStore = rootStore;
     this.leftOperand = leftOperand;
     this.rightOperand = rightOperand;
     this.operator = operator;
 
-    makeAutoObservable(this);
+    makeObservable(this, {
+      leftOperand: observable,
+      rightOperand: observable,
+      operator: observable,
+      onChangeRight: action
+    });
   }
 
   onChangeRight = value => (this.rightOperand = value);
-
-  onRemove = () => {
-    this.rootStore.onRemove(this);
-    this.rootStore = void 0;
-  };
 }
 
 export class CompoundCondition {
   conditions = [];
   operator = undefined;
-  
 
   constructor(operator, conditions, rootStore) {
     this.operator = operator;
-    
+
     if (conditions && conditions.length >= 0) {
       this.conditions = conditions;
       conditions.forEach(e => (e.rootStore = this));
     }
-
-    when(()=>{this.conditions && this.conditions[0] && this.conditions[0].length == 1},()=>console.log('zero'))
 
     makeObservable(this, {
       conditions: observable,
       operator: observable,
       onAdd: action,
       onRemove: action,
-      toJSON: computed
+      reorder: action
     });
   }
 
@@ -110,17 +105,9 @@ export class CompoundCondition {
   onRemove = item => {
     let idx = this.conditions.indexOf(item);
     this.conditions.splice(idx, 1);
-
-    if (this.rootStore && this.conditions.length == 1) {
-      this.rootStore.conditions[0] = this.conditions[0];
-      this.rootStore = void 0;
-    }
   };
 
-  get toJSON() {
-    return {
-      conditions: this.conditions,
-      operator: this.operator
-    };
-  }
+  reorder = item => {
+    this.conditions[0] = item;
+  };
 }

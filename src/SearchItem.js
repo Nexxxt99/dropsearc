@@ -21,6 +21,14 @@ const operations = ["AND", "OR", "EXCEPT", "ANY"];
 
 export const SearchConditions = observer(
   class SearchConditions extends React.Component {
+    onRemove(item) {
+      console.log([...this.props.store.conditions]);
+      this.props.store.onRemove(item);
+      if (this.props.store.conditions.length == 1) {
+        this.props.onRemove(item)
+      }
+    }
+
     render() {
       console.log("prps", this.props);
       const { operator, conditions, onAdd } = this.props.store;
@@ -29,13 +37,19 @@ export const SearchConditions = observer(
           <ul>
             {[...conditions].reverse().map((e, i) => {
               if (e.hasOwnProperty("conditions"))
-                return <SearchConditions key={i} store={e} />;
+                return (
+                  <SearchConditions
+                    key={i}
+                    store={e}
+                    onRemove={this.onRemove.bind(this, e)}
+                  />
+                );
               else
                 return (
                   <SearchItem
                     key={i}
                     store={e}
-                    onRemove={this.props.store.onRemove.bind({}, i)}
+                    onRemove={this.onRemove.bind(this, e)}
                   />
                 );
             })}
